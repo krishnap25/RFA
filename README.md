@@ -1,4 +1,4 @@
-# Leaf: A Benchmark for Federated Settings
+# Leaf-Robust-Agg: Robust Aggregration for Federated Learning
 
 ## Resources
 
