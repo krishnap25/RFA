@@ -21,7 +21,7 @@ parent_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 users_and_plays_path = os.path.join(parent_path, 'data', 'raw_data', 'users_and_plays.json')
 txt_dir = os.path.join(parent_path, 'data', 'raw_data', 'by_play_and_character')
-json_data = parse_data_in(txt_dir, users_and_plays_path, args.raw, seq_len=args.seq_length)
+json_data = parse_data_in(txt_dir, users_and_plays_path, args.raw, seq_length=args.seq_length)
 json_path = os.path.join(parent_path, 'data', 'all_data', 'all_data.json')
 with open(json_path, 'w') as outfile:
     json.dump(json_data, outfile)

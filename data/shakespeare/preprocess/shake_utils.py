@@ -28,7 +28,7 @@ def __txt_to_data(txt_dir, seq_length=80):
     return data_x, data_y
 
 
-def parse_data_in(data_dir, users_and_plays_path, raw=False):
+def parse_data_in(data_dir, users_and_plays_path, raw=False, seq_length=80):
     """
     returns dictionary with keys: users, num_samples, user_data
     raw := bool representing whether to include raw text in all_data
@@ -47,7 +47,7 @@ def parse_data_in(data_dir, users_and_plays_path, raw=False):
         filename = os.path.join(data_dir, f)
         with open(filename, 'r') as inf:
             passage = inf.read()
-        data_x, data_y = __txt_to_data(filename)
+        data_x, data_y = __txt_to_data(filename, seq_length=seq_length)
         if len(data_x) > 0:
             users.append(user)
             if raw:
