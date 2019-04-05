@@ -1,6 +1,6 @@
-'''
+"""
 splits data into train and test sets
-'''
+"""
 
 import argparse
 import json
@@ -13,8 +13,9 @@ from collections import OrderedDict
 
 from constants import DATASETS, SEED_FILES
 
+
 def create_jsons_for(user_files, which_set, max_users, include_hierarchy):
-    '''used in split-by-user case'''
+    """used in split-by-user case"""
     user_count = 0
     json_index = 0
     users = []
@@ -33,7 +34,7 @@ def create_jsons_for(user_files, which_set, max_users, include_hierarchy):
         file_dir = os.path.join(subdir, f)
         with open(file_dir, 'r') as inf:
             data = json.load(inf)
-        
+
         users.append(u)
         if include_hierarchy:
             hierarchies.append(h)
@@ -43,12 +44,13 @@ def create_jsons_for(user_files, which_set, max_users, include_hierarchy):
 
         if (user_count == max_users) or (i == len(user_files) - 1):
 
-            all_data = {}
-            all_data['users'] = users
+            all_data = {
+                'users': users,
+                'num_samples': num_samples,
+                'user_data': user_data
+            }
             if include_hierarchy:
                 all_data['hierarchies'] = hierarchies
-            all_data['num_samples'] = num_samples
-            all_data['user_data'] = user_data
 
             data_i = f.find('data')
             num_i = data_i + 5
@@ -57,9 +59,9 @@ def create_jsons_for(user_files, which_set, max_users, include_hierarchy):
             param_to_end = '.json'
             if param_i != -1:
                 param_to_end = num_to_end[param_i:]
-            nf = '%s_%d%s' % (f[:(num_i-1)], json_index, param_to_end)
+            nf = '%s_%d%s' % (f[:(num_i - 1)], json_index, param_to_end)
             file_name = '%s_%s_%s.json' % ((nf[:-5]), which_set, arg_label)
-            ouf_dir = os.path.join(dir, which_set, file_name)
+            ouf_dir = os.path.join(directory, which_set, file_name)
 
             print('writing %s' % file_name)
             with open(ouf_dir, 'w') as outfile:
@@ -73,27 +75,28 @@ def create_jsons_for(user_files, which_set, max_users, include_hierarchy):
             num_samples = []
             user_data = {}
 
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--name',
-                help='name of dataset to parse; default: sent140;',
-                type=str,
-                choices=DATASETS,
-                default='sent140')
+                    help='name of dataset to parse; default: sent140;',
+                    type=str,
+                    choices=DATASETS,
+                    default='sent140')
 parser.add_argument('--by_user',
-                help='divide users into training and test set groups;',
-                dest='user', action='store_true')
+                    help='divide users into training and test set groups;',
+                    dest='user', action='store_true')
 parser.add_argument('--by_sample',
-                help="divide each user's samples into training and test set groups;",
-                dest='user', action='store_false')
+                    help="divide each user's samples into training and test set groups;",
+                    dest='user', action='store_false')
 parser.add_argument('--frac',
-                help='fraction in training set; default: 0.9;',
-                type=float,
-                default=0.9)
+                    help='fraction in training set; default: 0.9;',
+                    type=float,
+                    default=0.9)
 parser.add_argument('--seed',
-                help='seed for random partitioning of test/train data',
-                type=int,
-                default=None)
+                    help='seed for random partitioning of test/train data',
+                    type=int,
+                    default=None)
 
 parser.set_defaults(user=False)
 
@@ -103,31 +106,32 @@ print('------------------------------')
 print('generating training and test sets')
 
 parent_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-dir = os.path.join(parent_path, args.name, 'data')
-subdir = os.path.join(dir, 'rem_user_data')
+directory = os.path.join(parent_path, args.name, 'data')
+subdir = os.path.join(directory, 'rem_user_data')
 files = []
 if os.path.exists(subdir):
     files = os.listdir(subdir)
 if len(files) == 0:
-    subdir = os.path.join(dir, 'sampled_data')
+    subdir = os.path.join(directory, 'sampled_data')
     if os.path.exists(subdir):
         files = os.listdir(subdir)
 if len(files) == 0:
-    subdir = os.path.join(dir, 'all_data')
+    subdir = os.path.join(directory, 'all_data')
     files = os.listdir(subdir)
 files = [f for f in files if f.endswith('.json')]
 
-rng_seed = (args.seed if (args.seed is not None and args.seed >= 0) else int(time.time()))
+rng_seed = args.seed if (args.seed is not None and args.seed >= 0) else 1
 rng = random.Random(rng_seed)
+
 if os.environ.get('LEAF_DATA_META_DIR') is not None:
     seed_fname = os.path.join(os.environ.get('LEAF_DATA_META_DIR'), SEED_FILES['split'])
     with open(seed_fname, 'w+') as f:
         f.write("# split_seed used by sampling script - supply as "
                 "--spltseed to preprocess.sh or --seed to utils/split_data.py\n")
         f.write(str(rng_seed))
-    print ("- random seed written out to {file}".format(file=seed_fname))
+    print("- random seed written out to {file}".format(file=seed_fname))
 else:
-    print ("- using random seed '{seed}' for sampling".format(seed=rng_seed))
+    print("- using random seed '{seed}' for sampling".format(seed=rng_seed))
 
 arg_label = str(args.frac)
 arg_label = arg_label[2:]
@@ -138,7 +142,7 @@ with open(file_dir, 'r') as inf:
     data = json.load(inf)
 include_hierarchy = 'hierarchies' in data
 
-if (args.user):
+if args.user:
     print('splitting data by user')
 
     # 1 pass through all the json files to instantiate arr
@@ -151,11 +155,11 @@ if (args.user):
             # and enable reproducibility
             data = json.load(inf, object_pairs_hook=OrderedDict)
         if include_hierarchy:
-            user_files.extend([(u, h, ns, f) for (u, h, ns) in 
-                zip(data['users'], data['hierarchies'], data['num_samples'])])
+            user_files.extend([(u, h, ns, f) for (u, h, ns) in
+                               zip(data['users'], data['hierarchies'], data['num_samples'])])
         else:
-            user_files.extend([(u, ns, f) for (u, ns) in 
-                zip(data['users'], data['num_samples'])])
+            user_files.extend([(u, ns, f) for (u, ns) in
+                               zip(data['users'], data['num_samples'])])
 
     # randomly sample from user_files to pick training set users
     num_users = len(user_files)
@@ -168,14 +172,14 @@ if (args.user):
     train_user_files = []
     test_user_files = []
     for i in range(num_users):
-        if (train_blist[i]):
+        if train_blist[i]:
             train_user_files.append(user_files[i])
         else:
             test_user_files.append(user_files[i])
 
     max_users = sys.maxsize
     if args.name == 'femnist':
-        max_users = 50 # max number of users per json file
+        max_users = 50  # max number of users per json file
     create_jsons_for(train_user_files, 'train', max_users, include_hierarchy)
     create_jsons_for(test_user_files, 'test', max_users, include_hierarchy)
 
@@ -194,7 +198,7 @@ else:
         num_samples_test = []
         user_data_test = {}
 
-        user_indices = [] # indices of users in data['users'] that are not deleted
+        user_indices = []  # indices of users in data['users'] that are not deleted
 
         for i, u in enumerate(data['users']):
             user_data_train[u] = {'x': [], 'y': []}
@@ -220,7 +224,7 @@ else:
                     train_blist[j] = True
 
                 for j in range(curr_num_samples):
-                    if (train_blist[j]):
+                    if train_blist[j]:
                         user_data_train[u]['x'].append(data['user_data'][u]['x'][j])
                         user_data_train[u]['y'].append(data['user_data'][u]['y'][j])
                     else:
@@ -229,14 +233,16 @@ else:
 
         users = [data['users'][i] for i in user_indices]
 
-        all_data_train = {}
-        all_data_train['users'] = users
-        all_data_train['num_samples'] = num_samples_train
-        all_data_train['user_data'] = user_data_train
-        all_data_test = {}
-        all_data_test['users'] = users
-        all_data_test['num_samples'] = num_samples_test
-        all_data_test['user_data'] = user_data_test
+        all_data_train = {
+            'users': users,
+            'num_samples': num_samples_train,
+            'user_data': user_data_train
+        }
+        all_data_test = {
+            'users': users,
+            'num_samples': num_samples_test,
+            'user_data': user_data_test
+        }
 
         if include_hierarchy:
             all_data_train['hierarchies'] = data['hierarchies']
@@ -244,8 +250,8 @@ else:
 
         file_name_train = '%s_train_%s.json' % ((f[:-5]), arg_label)
         file_name_test = '%s_test_%s.json' % ((f[:-5]), arg_label)
-        ouf_dir_train = os.path.join(dir, 'train', file_name_train)
-        ouf_dir_test = os.path.join(dir, 'test', file_name_test)
+        ouf_dir_train = os.path.join(directory, 'train', file_name_train)
+        ouf_dir_test = os.path.join(directory, 'test', file_name_test)
         print('writing %s' % file_name_train)
         with open(ouf_dir_train, 'w') as outfile:
             json.dump(all_data_train, outfile)

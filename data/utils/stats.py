@@ -1,6 +1,6 @@
-'''
+"""
 assumes that the user has already generated .json file(s) containing data
-'''
+"""
 
 import argparse
 import json
@@ -17,16 +17,15 @@ from constants import DATASETS
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--name',
-                help='name of dataset to parse; default: sent140;',
-                type=str,
-                choices=DATASETS,
-                default='sent140')
+                    help='name of dataset to parse; default: sent140;',
+                    type=str,
+                    choices=DATASETS,
+                    default='sent140')
 
 args = parser.parse_args()
 
 
 def load_data(name):
-
     users = []
     num_samples = []
 
@@ -48,6 +47,7 @@ def load_data(name):
 
     return users, num_samples
 
+
 def print_dataset_stats(name):
     users, num_samples = load_data(name)
     num_users = len(users)
@@ -58,16 +58,17 @@ def print_dataset_stats(name):
     print('%d samples (total)' % np.sum(num_samples))
     print('%.2f samples per user (mean)' % np.mean(num_samples))
     print('num_samples (std): %.2f' % np.std(num_samples))
-    print('num_samples (std/mean): %.2f' % (np.std(num_samples)/np.mean(num_samples)))
+    print('num_samples (std/mean): %.2f' % (np.std(num_samples) / np.mean(num_samples)))
     print('num_samples (skewness): %.2f' % stats.skew(num_samples))
-    
+
     bins = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
     if args.name == 'shakespeare':
         bins = [0, 2000, 4000, 6000, 8000, 10000, 12000, 14000, 16000, 18000, 20000]
     if args.name == 'femnist':
-        bins = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500]
+        bins = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420,
+                440, 460, 480, 500]
 
-    hist, edges = np.histogram(num_samples,bins=bins)
+    hist, edges = np.histogram(num_samples, bins=bins)
     print("\nnum_sam\tnum_users")
     for e, h in zip(edges, hist):
         print(e, "\t", h)
@@ -75,7 +76,7 @@ def print_dataset_stats(name):
     parent_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     data_dir = os.path.join(parent_path, name, 'data')
 
-    plt.hist(num_samples, bins = bins) 
+    plt.hist(num_samples, bins=bins)
     fig_name = "%s_hist_nolabel.png" % name
     fig_dir = os.path.join(data_dir, fig_name)
     plt.savefig(fig_dir)
@@ -85,5 +86,6 @@ def print_dataset_stats(name):
     fig_name = "%s_hist.png" % name
     fig_dir = os.path.join(data_dir, fig_name)
     plt.savefig(fig_dir)
+
 
 print_dataset_stats(args.name)

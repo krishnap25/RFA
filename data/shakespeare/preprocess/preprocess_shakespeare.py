@@ -27,6 +27,7 @@ import os
 import random
 import re
 import sys
+
 RANDOM_SEED = 1234
 # Regular expression to capture an actors name, and line continuation
 CHARACTER_RE = re.compile(r'^  ([a-zA-Z][a-zA-Z ]*)\. (.*)')
@@ -36,13 +37,16 @@ CONT_RE = re.compile(r'^    (.*)')
 COE_CHARACTER_RE = re.compile(r'^([a-zA-Z][a-zA-Z ]*)\. (.*)')
 COE_CONT_RE = re.compile(r'^(.*)')
 
+
 def _match_character_regex(line, comedy_of_errors=False):
     return (COE_CHARACTER_RE.match(line) if comedy_of_errors
             else CHARACTER_RE.match(line))
 
+
 def _match_continuation_regex(line, comedy_of_errors=False):
     return (
         COE_CONT_RE.match(line) if comedy_of_errors else CONT_RE.match(line))
+
 
 def _split_into_plays(shakespeare_full):
     """Splits the full data by play."""
@@ -88,8 +92,8 @@ def _split_into_plays(shakespeare_full):
             title = title.strip()
 
             assert title, (
-                'Parsing error on line %d. Expecting title 2 or 3 lines above.' %
-                i)
+                    'Parsing error on line %d. Expecting title 2 or 3 lines above.' %
+                    i)
             comedy_of_errors = (title == 'THE COMEDY OF ERRORS')
             # Degenerate plays are removed at the end of the method.
             plays.append((title, characters))
@@ -126,11 +130,14 @@ def _split_into_plays(shakespeare_full):
     # Remove degenerate "plays".
     return [play for play in plays if len(play[1]) > 1], discarded_lines
 
+
 def _remove_nonalphanumerics(filename):
     return re.sub('\\W+', '_', filename)
 
+
 def play_and_character(play, character):
     return _remove_nonalphanumerics((play + '_' + character).replace(' ', '_'))
+
 
 def _get_train_test_by_character(plays, test_fraction=0.2):
     """
@@ -172,6 +179,7 @@ def _get_train_test_by_character(plays, test_fraction=0.2):
             add_examples(all_train_examples, train_examples)
     return users_and_plays, all_train_examples, all_test_examples
 
+
 def _write_data_by_character(examples, output_directory):
     """Writes a collection of data files by play & character."""
     if not os.path.exists(output_directory):
@@ -181,6 +189,7 @@ def _write_data_by_character(examples, output_directory):
         with open(filename, 'w') as output:
             for sound_bite in sound_bites:
                 output.write(sound_bite + '\n')
+
 
 def main(argv):
     print('Splitting .txt data between users')
@@ -196,6 +205,7 @@ def main(argv):
     _write_data_by_character(all_examples,
                              os.path.join(output_directory,
                                           'by_play_and_character/'))
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])

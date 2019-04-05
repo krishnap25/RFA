@@ -1,4 +1,4 @@
-'''
+"""
 Creates .pkl files for:
 1. list of directories of every image in 'by_class'
 2. list of directories of every image in 'by_write'
@@ -6,7 +6,7 @@ the hierarchal structure of the data is as follows:
 - by_class -> classes -> folders containing images -> images
 - by_write -> folders containing writers -> writer -> types of images -> images
 the directories written into the files are of the form 'raw_data/...'
-'''
+"""
 
 import os
 import sys
@@ -15,7 +15,7 @@ utils_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 utils_dir = os.path.join(utils_dir, 'utils')
 sys.path.append(utils_dir)
 
-import util
+import util  # noqa: E402
 
 parent_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 

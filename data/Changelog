@@ -1,0 +1,5 @@
+Changes Introduced Beyond the Original Leaf Repository
+------------------------------------------------------
+
+- Add a sequence length option to the Shakespeare Dataset with a default of 20. Leaf uses a default of 80.
+- Hard-code default random seeds in sample.py and split_data.py.

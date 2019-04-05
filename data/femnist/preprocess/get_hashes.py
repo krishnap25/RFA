@@ -6,7 +6,7 @@ utils_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 utils_dir = os.path.join(utils_dir, 'utils')
 sys.path.append(utils_dir)
 
-import util
+import util  # noqa: E402
 
 parent_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
@@ -20,7 +20,7 @@ write_file_hashes = []
 
 count = 0
 for tup in class_file_dirs:
-    if (count % 100000 == 0):
+    if count % 100000 == 0:
         print('hashed %d class images' % count)
 
     (cclass, cfile) = tup
@@ -37,7 +37,7 @@ util.save_obj(class_file_hashes, cfhd)
 
 count = 0
 for tup in write_file_dirs:
-    if (count % 100000 == 0):
+    if count % 100000 == 0:
         print('hashed %d write images' % count)
 
     (cclass, cfile) = tup

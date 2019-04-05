@@ -1,8 +1,10 @@
-# Converts a list of (writer, [list of (file,class)]) tuples into a json object
-# of the form:
-#   {users: [bob, etc], num_samples: [124, etc.],
-#   user_data: {bob : {x:[img1,img2,etc], y:[class1,class2,etc]}, etc}}
-# where 'img_' is a vectorized representation of the corresponding image
+"""
+Converts a list of (writer, [list of (file,class)]) tuples into a json object
+of the form:
+  {users: [bob, etc], num_samples: [124, etc.],
+  user_data: {bob : {x:[img1,img2,etc], y:[class1,class2,etc]}, etc}}
+where 'img_' is a vectorized representation of the corresponding image
+"""
 
 from __future__ import division
 import json
@@ -17,25 +19,26 @@ utils_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 utils_dir = os.path.join(utils_dir, 'utils')
 sys.path.append(utils_dir)
 
-import util
+import util  # noqa: E402
 
 MAX_WRITERS = 100  # max number of writers per json file.
 
 
 def relabel_class(c):
-    '''
+    """
     maps hexadecimal class value (string) to a decimal number
     returns:
     - 0 through 9 for classes representing respective numbers
     - 10 through 35 for classes representing respective uppercase letters
     - 36 through 61 for classes representing respective lowercase letters
-    '''
+    """
     if c.isdigit() and int(c) < 40:
-        return (int(c) - 30)
-    elif int(c, 16) <= 90: # uppercase
-        return (int(c, 16) - 55)
+        return int(c) - 30
+    elif int(c, 16) <= 90:  # uppercase
+        return int(c, 16) - 55
     else:
-        return (int(c, 16) - 61)
+        return int(c, 16) - 61
+
 
 parent_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
@@ -74,11 +77,11 @@ for (w, l) in writers:
 
     writer_count += 1
     if writer_count == MAX_WRITERS:
-
-        all_data = {}
-        all_data['users'] = users[json_index]
-        all_data['num_samples'] = num_samples[json_index]
-        all_data['user_data'] = user_data[json_index]
+        all_data = {
+            'users':  users[json_index],
+            'num_samples': num_samples[json_index],
+            'user_data': user_data[json_index]
+        }
 
         file_name = 'all_data_%d.json' % json_index
         file_path = os.path.join(parent_path, 'data', 'all_data', file_name)
