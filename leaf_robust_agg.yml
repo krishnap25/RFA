@@ -1,0 +1,11 @@
+name: leaf_robust_agg
+channels:
+  - anaconda
+  - defaults
+dependencies:
+  - python=3.6
+  - numpy
+  - scipy
+  - pillow
+  - pandas
+
