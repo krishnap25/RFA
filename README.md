@@ -44,7 +44,7 @@ Installation
 This code is written in Python 3.6 
 and has been tested on Tensorflow 1.12.
 A conda environment file is provided in 
-´´´leaf_robust_agg.yml´´´ with all dependencies except Tensorflow. 
+`leaf_robust_agg.yml` with all dependencies except Tensorflow. 
 It can be installed by using 
 [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file)
 as follows
