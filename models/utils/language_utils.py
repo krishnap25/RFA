@@ -4,7 +4,6 @@ import json
 import numpy as np
 import re
 
-
 # ------------------------
 # utils for shakespeare dataset
 
@@ -21,22 +20,22 @@ def _one_hot(index, size):
 
 def letter_to_vec(letter):
     """Returns one-hot representation of given letter."""
-    index = max(0,ALL_LETTERS.find(letter)) # treating ' ' as unknown character
+    index = max(0, ALL_LETTERS.find(letter))  # treating ' ' as unknown character
     return _one_hot(index, NUM_LETTERS)
 
 
 def word_to_indices(word):
-    '''returns a list of character indices
+    """Returns a list of character indices
 
     Args:
         word: string
     
     Return:
         indices: int list with length len(word)
-    '''
+    """
     indices = []
     for c in word:
-        indices.append(max(0, ALL_LETTERS.find(c))) # added max to account for -1
+        indices.append(max(0, ALL_LETTERS.find(c)))  # added max to account for -1
     return indices
 
 
@@ -88,12 +87,12 @@ def line_to_indices(line, indd, max_words=25):
     Return:
         indl: list of word indices, one index for each word in phrase
     """
-    line_list = split_line(line) # split phrase in words
+    line_list = split_line(line)  # split phrase in words
     indl = []
     for word in line_list:
         cind = _word_to_index(word, indd)
         indl.append(cind)
-        if (len(indl) == max_words):
+        if len(indl) == max_words:
             break
     for i in range(max_words - len(indl)):
         indl.append(len(indd))
@@ -110,7 +109,7 @@ def bag_of_words(line, vocab):
     Return:
         integer list
     """
-    bag = [0]*len(vocab)
+    bag = [0] * len(vocab)
     words = split_line(line)
     for w in words:
         if w in vocab:
@@ -143,4 +142,3 @@ def val_to_vec(size, val):
     vec = [0 for _ in range(size)]
     vec[int(val)] = 1
     return vec
-

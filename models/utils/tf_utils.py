@@ -1,22 +1,23 @@
-
 import tensorflow as tf
 
+
 def __num_elems(shape):
-    '''Returns the number of elements in the given shape
+    """Returns the number of elements in the given shape
 
     Args:
         shape: TensorShape
     
     Return:
         tot_elems: int
-    '''
+    """
     tot_elems = 1
     for s in shape:
         tot_elems *= int(s)
     return tot_elems
 
+
 def graph_size(graph):
-    '''Returns the size of the given graph in bytes
+    """Returns the size of the given graph in bytes
 
     The size of the graph is calculated by summing up the sizes of each
     trainable variable. The sizes of variables are calculated by multiplying
@@ -27,7 +28,7 @@ def graph_size(graph):
         graph: TF graph
     Return:
         integer representing size of graph (in bytes)
-    '''
+    """
     tot_size = 0
     with graph.as_default():
         vs = tf.trainable_variables()

@@ -10,7 +10,6 @@ sys.path.append(models_dir)
 
 from baseline_constants import CLIENT_ID_KEY, NUM_ROUND_KEY, NUM_SAMPLES_KEY
 
-
 COLUMN_NAMES = [
     CLIENT_ID_KEY, NUM_ROUND_KEY, 'hierarchy', NUM_SAMPLES_KEY]
 
@@ -41,6 +40,7 @@ def print_metrics(
             to which the client belongs.
         num_samples: Dict keyed by client id. Each element is the number of test
             samples for the client.
+        path: Full path of output CSV file.
     """
     columns = COLUMN_NAMES + get_metrics_names(metrics)
     client_data = pd.DataFrame(columns=columns)
@@ -53,6 +53,7 @@ def print_metrics(
         }
 
         current_metrics = metrics.get(c_id, {})
+        # TODO: fix training metrics
         for metric, metric_value in current_metrics.items():
             current_client[metric] = metric_value
         client_data.loc[len(client_data)] = current_client
@@ -78,5 +79,3 @@ def get_metrics_names(metrics):
         return []
     metrics_dict = next(iter(metrics.values()))
     return list(metrics_dict.keys())
-
-

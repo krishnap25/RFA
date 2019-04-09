@@ -1,27 +1,29 @@
 import json
-import numpy as np
 import os
-import re
-import sys
 
 
-def batch_data(data, batch_size):
-    '''
-    data is a dict := {'x': [list], 'y': [list]}
+def batch_data(data, batch_size, rng=None, shuffle=True, eval_mode=False):
+    """
+    data is a dict := {'x': [list], 'y': [list]} with optional fields 'y_true': [list], 'x_true' : [list]
+    If eval_mode, use 'x_true' and 'y_true' instead of 'x' and 'y', if such fields exist
     returns x, y, which are both lists of size-batch_size lists
-    '''
-    raw_x = data['x']
-    raw_y = data['y']        
-    batched_x = []
-    batched_y = []
+    """
+    x = data['x_true'] if eval_mode and 'x_true' in data else data['x']
+    y = data['y_true'] if eval_mode and 'y_true' in data else data['y']
+    raw_x_y = list(zip(x, y))
+    if shuffle:
+        assert rng is not None
+        rng.shuffle(raw_x_y)
+    raw_x, raw_y = zip(*raw_x_y)
+    batched_x, batched_y = [], []
     for i in range(0, len(raw_x), batch_size):
-        batched_x.append(raw_x[i:i+batch_size])
-        batched_y.append(raw_y[i:i+batch_size])
+        batched_x.append(raw_x[i:i + batch_size])
+        batched_y.append(raw_y[i:i + batch_size])
     return batched_x, batched_y
 
 
 def read_data(train_data_dir, test_data_dir):
-    '''parses data in given train and test data directories
+    """parses data in given train and test data directories
 
     assumes:
     - the data in the input directories are .json files with 
@@ -33,7 +35,7 @@ def read_data(train_data_dir, test_data_dir):
         groups: list of group ids; empty list if none found
         train_data: dictionary of train data
         test_data: dictionary of test data
-    '''
+    """
     clients = []
     groups = []
     train_data = {}
@@ -42,7 +44,7 @@ def read_data(train_data_dir, test_data_dir):
     train_files = os.listdir(train_data_dir)
     train_files = [f for f in train_files if f.endswith('.json')]
     for f in train_files:
-        file_path = os.path.join(train_data_dir,f)
+        file_path = os.path.join(train_data_dir, f)
         with open(file_path, 'r') as inf:
             cdata = json.load(inf)
         clients.extend(cdata['users'])

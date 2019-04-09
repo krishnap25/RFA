@@ -1,15 +1,17 @@
-import random
-
+import numpy as np
 
 from baseline_constants import BYTES_WRITTEN_KEY, BYTES_READ_KEY, LOCAL_COMPUTATIONS_KEY
+from baseline_constants import CORRUPTION_OMNISCIENT_KEY, MAX_UPDATE_NORM
 
 
 class Server:
-    
+
     def __init__(self, model):
         self.model = model  # global model of the server.
         self.selected_clients = []
         self.updates = []
+        self.rng = model.rng  # use random number generator of the model
+        self.total_num_comm_rounds = 0
 
     def select_clients(self, possible_clients, num_clients=20):
         """Selects num_clients clients randomly from possible_clients.
@@ -24,11 +26,11 @@ class Server:
             list of (num_train_samples, num_test_samples)
         """
         num_clients = min(num_clients, len(possible_clients))
-        self.selected_clients = random.sample(possible_clients, num_clients)
+        self.selected_clients = self.rng.sample(possible_clients, num_clients)
 
         return [(len(c.train_data['y']), len(c.eval_data['y'])) for c in self.selected_clients]
 
-    def train_model(self, num_epochs=1, batch_size=10, minibatch=None, clients=None):
+    def train_model(self, num_epochs=1, batch_size=10, minibatch=None, clients=None, lr=None):
         """Trains self.model on given clients.
         
         Trains model on self.selected_clients if clients=None;
@@ -41,6 +43,7 @@ class Server:
             batch_size: Size of training batches.
             minibatch: fraction of client's data to apply minibatch sgd,
                 None to use FedAvg
+            lr: learning rate to use
         Return:
             bytes_written: number of bytes written by each client to server 
                 dictionary with client ids as keys and integer values.
@@ -55,43 +58,67 @@ class Server:
             c.id: {BYTES_WRITTEN_KEY: 0,
                    BYTES_READ_KEY: 0,
                    LOCAL_COMPUTATIONS_KEY: 0} for c in clients}
+        losses = []
         for c in clients:
-            self.model.send_to([c])
+            self.model.send_to([c])  # reset client model
             sys_metrics[c.id][BYTES_READ_KEY] += self.model.size
 
-            comp, num_samples, update = c.train(num_epochs, batch_size, minibatch)
+            comp, num_samples, averaged_loss, update = c.train(num_epochs, batch_size, minibatch, lr)
             sys_metrics[c.id][LOCAL_COMPUTATIONS_KEY] = comp
+            losses.append(averaged_loss)
 
             self.updates.append((num_samples, update))
             sys_metrics[c.id][BYTES_WRITTEN_KEY] += self.model.size
-        return sys_metrics
 
-    def update_model(self):
-        self.model.update(self.updates)
+        return sys_metrics, np.average(losses, weights=[len(c.train_data['y']) for c in clients]), losses
+
+    def update_model(self, aggregation, corruption=None, corrupted_client_ids=frozenset(), maxiter=4):
+        is_corrupted = [(client.id in corrupted_client_ids) for client in self.selected_clients]
+        if corruption == CORRUPTION_OMNISCIENT_KEY and any(is_corrupted):
+            # compute omniscient update
+            avg = self.model.weighted_average_oracle([u[1] for u in self.updates], [u[0] for u in self.updates])
+            num_pts = sum([u[0] for u in self.updates])
+
+            corrupted_updates = [u for c, u in zip(is_corrupted, self.updates) if c]
+            corrupted_avg = self.model.weighted_average_oracle([u[1] for u in corrupted_updates],
+                                                               [u[0] for u in corrupted_updates])
+            num_corrupt_pts = sum([u[0] for u in corrupted_updates])
+            omniscient_update = [wc - 2 * num_pts / num_corrupt_pts * w_avg for wc, w_avg in zip(corrupted_avg, avg)]
+            # change self.updates to reflect omniscient update
+            for i in range(len(self.updates)):
+                if is_corrupted[i]:
+                    self.updates[i] = (self.updates[i][0], omniscient_update)
+
+        num_comm_rounds, is_updated = self.model.update(self.updates, aggregation,
+                                                        max_update_norm=MAX_UPDATE_NORM,
+                                                        maxiter=maxiter)
+        self.total_num_comm_rounds += num_comm_rounds
         self.updates = []
+        return self.total_num_comm_rounds, is_updated
 
-    def test_model(self, clients_to_test=None):
+    def test_model(self, clients_to_test=None, train_and_test=False):
         """Tests self.model on given clients.
 
         Tests model on self.selected_clients if clients_to_test=None.
 
         Args:
             clients_to_test: list of Client objects.
+            train_and_test: If True, also measure metrics on training data
         """
         if clients_to_test is None:
             clients_to_test = self.selected_clients
         metrics = {}
 
         self.model.send_to(clients_to_test)
-        
+
         for client in clients_to_test:
-            c_metrics = client.test(self.model.cur_model)
+            c_metrics = client.test(self.model.cur_model, train_and_test)
             metrics[client.id] = c_metrics
 
         return metrics
 
-    def get_clients_test_info(self, clients=None):
-        """Returns the ids, hierarchies and num_test_samples for the given clients.
+    def get_clients_info(self, clients=None):
+        """Returns the ids, hierarchies, num_train_samples and num_test_samples for the given clients.
 
         Returns info about self.selected_clients if clients=None;
 
@@ -102,5 +129,6 @@ class Server:
             clients = self.selected_clients
         ids = [c.id for c in clients]
         groups = {c.id: c.group for c in clients}
-        num_samples = {c.id: c.num_test_samples for c in clients}
-        return ids, groups, num_samples
+        num_train_samples = {c.id: c.num_train_samples for c in clients}
+        num_test_samples = {c.id: c.num_test_samples for c in clients}
+        return ids, groups, num_train_samples, num_test_samples
