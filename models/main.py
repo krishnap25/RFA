@@ -11,10 +11,10 @@ import time
 from datetime import timedelta
 
 from baseline_constants import MAIN_PARAMS, MODEL_PARAMS
-from baseline_constants import OptimLoggingKeys
+from baseline_constants import OptimLoggingKeys, CORRUPTION_OMNISCIENT_KEY
 from model import ServerModel
 from server import Server
-from utils import model_utils as utils
+from utils import main_utils as utils
 
 
 def main():
