@@ -49,6 +49,15 @@ class Client:
         return model.test(self.eval_data, self.train_data if train_and_test else None)
 
     @property
+    def num_train_samples(self):
+        """Number of train samples for this client.
+
+        Return:
+            int: Number of train samples for this client
+        """
+        return len(self.train_data['y'])
+
+    @property
     def num_test_samples(self):
         """Number of test samples for this client.
 

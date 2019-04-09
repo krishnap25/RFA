@@ -1,25 +1,13 @@
-SIM_TIMES = ['small', 'medium', 'large']
-
 MAIN_PARAMS = {  # (tot_num_rounds, eval_every_num_rounds, clients_per_round)
-    'sent140': {
-        'small': (10, 2, 2),
-        'medium': (16, 2, 2),
-        'large': (24, 2, 2)
-    },
-    'femnist': {
-        'small': (30, 10, 2),
-        'medium': (100, 10, 2),
-        'large': (400, 20, 2)
-    },
-    'shakespeare': {
-        'small': (6, 2, 2),
-        'medium': (8, 2, 2),
-        'large': (20, 1, 2)
-    }
+    'sent140': (10, 2, 2),
+    'femnist': (400, 20, 2),
+    'shakespeare': (20, 1, 2)
 }
+
 MODEL_PARAMS = {
-    'sent140.bag_dnn': (0.0003, 2),  # lr, num_classes
-    'sent140.stacked_lstm': (0.0003, 25, 2, 100),  # lr, seq_len, num_classes, num_hidden ; TODO: find max batch size
+    'sent140.bag_dnn': (0.0003, 2, round(1e9)),  # lr, num_classes, max_batch_size
+    'sent140.stacked_lstm': (0.0003, 25, 2, 100, 16384),  # lr, seq_len, num_classes, num_hidden, max-batch-size
+    # TODO: find max batch size of sent140.stacked_lstm'
     'sent140.bag_log_reg': (0.0003, 2, round(1e9)),  # lr, num_classes, max_batch_size
     'femnist.cnn': (5e-2, 62, 16384),  # lr, num_classes, max_batch_size
     'femnist.log_reg': (2e-2, 62, round(1e9)),  # lr, num_classes, max_batch_size
@@ -29,13 +17,6 @@ MODEL_PARAMS = {
 
 MAX_UPDATE_NORM = 1000  # reject all updates larger than this amount
 
-ACCURACY_KEY = 'accuracy'
-BYTES_WRITTEN_KEY = 'bytes_written'
-BYTES_READ_KEY = 'bytes_read'
-LOCAL_COMPUTATIONS_KEY = 'local_computations'
-NUM_ROUND_KEY = 'round_number'
-NUM_SAMPLES_KEY = 'num_samples'
-CLIENT_ID_KEY = 'client_id'
 
 class OptimLoggingKeys:
     TRAIN_ACCURACY_KEY = 'train_accuracy'

@@ -1,6 +1,5 @@
 import numpy as np
 
-from baseline_constants import BYTES_WRITTEN_KEY, BYTES_READ_KEY, LOCAL_COMPUTATIONS_KEY
 from baseline_constants import CORRUPTION_OMNISCIENT_KEY, MAX_UPDATE_NORM
 
 
@@ -54,23 +53,16 @@ class Server:
         """
         if clients is None:
             clients = self.selected_clients
-        sys_metrics = {
-            c.id: {BYTES_WRITTEN_KEY: 0,
-                   BYTES_READ_KEY: 0,
-                   LOCAL_COMPUTATIONS_KEY: 0} for c in clients}
         losses = []
         for c in clients:
             self.model.send_to([c])  # reset client model
-            sys_metrics[c.id][BYTES_READ_KEY] += self.model.size
 
             comp, num_samples, averaged_loss, update = c.train(num_epochs, batch_size, minibatch, lr)
-            sys_metrics[c.id][LOCAL_COMPUTATIONS_KEY] = comp
             losses.append(averaged_loss)
 
             self.updates.append((num_samples, update))
-            sys_metrics[c.id][BYTES_WRITTEN_KEY] += self.model.size
 
-        return sys_metrics, np.average(losses, weights=[len(c.train_data['y']) for c in clients]), losses
+        return np.average(losses, weights=[len(c.train_data['y']) for c in clients]), losses
 
     def update_model(self, aggregation, corruption=None, corrupted_client_ids=frozenset(), maxiter=4):
         is_corrupted = [(client.id in corrupted_client_ids) for client in self.selected_clients]

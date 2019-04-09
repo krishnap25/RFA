@@ -5,7 +5,7 @@ import numpy as np
 import random
 import tensorflow as tf
 
-from baseline_constants import ACCURACY_KEY, OptimLoggingKeys, AGGR_MEAN, AGGR_GEO_MED
+from baseline_constants import OptimLoggingKeys, AGGR_MEAN, AGGR_GEO_MED
 
 from utils.model_utils import batch_data
 from utils.tf_utils import graph_size
@@ -137,8 +137,7 @@ class Model(ABC):
             acc = total_correct / count
             output[data_type] = [loss, acc]
 
-        return {ACCURACY_KEY: output['eval'][1],
-                OptimLoggingKeys.TRAIN_LOSS_KEY: output['train'][0],
+        return {OptimLoggingKeys.TRAIN_LOSS_KEY: output['train'][0],
                 OptimLoggingKeys.TRAIN_ACCURACY_KEY: output['train'][1],
                 OptimLoggingKeys.EVAL_LOSS_KEY: output['eval'][0],
                 OptimLoggingKeys.EVAL_ACCURACY_KEY: output['eval'][1]

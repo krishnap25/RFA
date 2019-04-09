@@ -1,24 +1,20 @@
-"""Script to run the baselines."""
+"""Main file to launch experiments."""
 
 import argparse
 import copy
 import importlib
 import gc
-import math
-import pickle as pkl
 import random
 import os
 import sys
 
-import metrics.writer as metrics_writer
 import numpy as np
 import pandas as pd
-from PIL import Image
 import tensorflow as tf
 import time
 from datetime import timedelta
 
-from baseline_constants import MAIN_PARAMS, MODEL_PARAMS, SIM_TIMES, AVG_LOSS_KEY, ACCURACY_KEY, TRAINING_KEYS
+from baseline_constants import MAIN_PARAMS, MODEL_PARAMS, TRAINING_KEYS
 from baseline_constants import OptimLoggingKeys
 from baseline_constants import CORRUPTION_OMNISCIENT_KEY, CORRUPTION_FLIP_KEY, CORRUPTION_P_X_KEY
 from baseline_constants import AGGR_MEAN, AGGR_GEO_MED
@@ -28,9 +24,7 @@ from server import Server
 from utils.constants import DATASETS
 from utils.model_utils import read_data
 
-STAT_METRICS_PATH = '/dev/null'
-SYS_METRICS_PATH = '/dev/null'
-SUMMARY_METRICS_PATH = '/dev/null'
+SUMMARY_METRICS_PATH = 'output.log'
 
 
 def main():
@@ -46,7 +40,7 @@ def main():
     mod = importlib.import_module(model_path)
     ClientModel = getattr(mod, 'ClientModel')
 
-    tup = MAIN_PARAMS[args.dataset][args.t]
+    tup = MAIN_PARAMS[args.dataset]
     num_rounds = args.num_rounds if args.num_rounds != -1 else tup[0]
     eval_every = args.eval_every if args.eval_every != -1 else tup[1]
     clients_per_round = args.clients_per_round if args.clients_per_round != -1 else tup[2]
@@ -93,8 +87,6 @@ def main():
             stat_metrics = None
         else:
             stat_metrics = server.test_model(clients, train_and_test=True)
-            metrics_writer.print_metrics(0, all_ids, stat_metrics, all_groups,
-                                         all_num_test_samples, args.output_stat_file)
 
         summary_iter = print_metrics(iteration, comm_rounds, stat_metrics,
                                      all_num_train_samples, all_num_test_samples,
@@ -111,7 +103,6 @@ def main():
 
     # Initialize diagnostics
     initial_loss = s.get(OptimLoggingKeys.TRAIN_LOSS_KEY, None)
-    initial_avg_loss = None
     num_no_progress = 0
 
     # Simulate training
@@ -122,7 +113,6 @@ def main():
 
         # Select clients to train this round
         server.select_clients(online(clients), num_clients=clients_per_round)
-        c_ids, c_groups, c_num_train_samples, c_num_test_samples = server.get_clients_info()
 
         # Logging selection
         num_corr, num_cl, corr_frac = get_corrupted_fraction(server.selected_clients, corrupted_client_ids)
@@ -130,11 +120,10 @@ def main():
             num_corr, num_cl, corr_frac), flush=True)
 
         # Simulate server model training on selected clients' data
-        # Simulate server model training on selected clients' data
-        sys_metrics, avg_loss, losses = server.train_model(num_epochs=args.num_epochs,
-                                                           batch_size=args.batch_size,
-                                                           minibatch=args.minibatch,
-                                                           lr=args.lr)
+        avg_loss, losses = server.train_model(num_epochs=args.num_epochs,
+                                              batch_size=args.batch_size,
+                                              minibatch=args.minibatch,
+                                              lr=args.lr)
 
         # Update server model
         total_num_comm_rounds, is_updated = server.update_model(aggregation=args.aggregation,
@@ -142,7 +131,7 @@ def main():
                                                                 corrupted_client_ids=corrupted_client_ids,
                                                                 maxiter=args.weiszfeld_maxiter)
 
-        # Diagnostics
+        # Quit if no progress made
         if is_updated:
             num_no_progress = 0
         else:
@@ -169,7 +158,7 @@ def main():
             s = log_helper(i + 1, total_num_comm_rounds)
             if OptimLoggingKeys.TRAIN_LOSS_KEY in s:
                 if initial_loss is not None and s[OptimLoggingKeys.TRAIN_LOSS_KEY] > 3 * initial_loss:
-                    print('Loss > 3 * initial_loss. Exiting')
+                    print('Train_objective > 3 * initial_train_objective. Exiting')
                     break
             if args.no_logging:
                 # save model
@@ -179,7 +168,7 @@ def main():
         if (i + 1) % args.decay_lr_every == 0:
             args.lr /= args.lr_decay
 
-    # Save server model
+    # Save logs and server model
     summary.to_csv(args.output_summary_file, mode='w', header=True, index=False)
     save_model(server_model, args.dataset, args.model, args.output_summary_file)
 
@@ -291,8 +280,12 @@ def parse_args():
     parser.add_argument('--no-logging',
                         help='if specified, do not perform testing. Instead save model to disk.',
                         action='store_true')
+    args = parser.parse_args()
+    if args.seed is None:
+        args.seed = random.randint(0, sys.maxsize)
+        print('Random seed not provided. Using {} as seed'.format(args.seed))
 
-    return parser.parse_args()
+    return args
 
 
 def setup_clients(dataset, model=None, validation=False, corruption=None,
@@ -357,7 +350,7 @@ def corrupt_one_client_data(dataset, client, corruption):
             # take negative of image, leave labels untouched
             x_new = []
             for img in x:
-                x_new.append([1-pixel for pixel in img])
+                x_new.append([1 - pixel for pixel in img])
             client.train_data['x_true'] = x
             client.train_data['x'] = x_new
 
@@ -425,14 +418,16 @@ def get_corrupted_fraction(selected_clients, corrupted_client_ids):
             num_corrupted_pts / total_num_pts)
 
 
-def save_model(server_model, dataset, model):
+def save_model(server_model, dataset, model, output_summary_file):
     """Saves the given server model on checkpoints/dataset/model.ckpt."""
     # Save server model
-    ckpt_path = os.path.join('checkpoints', dataset)
+    start_time = time.time()
+    ckpt_path = os.path.join('checkpoints', *(output_summary_file.split(os.path.sep)[1:]))
+    print(ckpt_path)
     if not os.path.exists(ckpt_path):
         os.makedirs(ckpt_path)
-    save_path = server_model.save(os.path.join(ckpt_path, '%s.ckpt' % model))
-    print('Model saved in path: %s' % save_path)
+    save_path = server_model.save('%s.ckpt' % ckpt_path)
+    print('Model saved in path: {} in time {:.2f} sec'.format(save_path, time.time() - start_time))
 
 
 def print_metrics(iteration, comm_rounds, metrics, train_weights, test_weights, elapsed_time=0):
@@ -456,10 +451,8 @@ def print_metrics(iteration, comm_rounds, metrics, train_weights, test_weights, 
         print(iteration, end=', ')
         ordered_tr_weights = [train_weights[c] for c in sorted(train_weights)]
         ordered_te_weights = [test_weights[c] for c in sorted(test_weights)]
-        metric_names = metrics_writer.get_metrics_names(metrics)
+        metric_names = get_metrics_names(metrics)
         for metric in metric_names:
-            if metric == ACCURACY_KEY:  # Do not print
-                continue
             ordered_weights = ordered_tr_weights if metric in TRAINING_KEYS else ordered_te_weights
             ordered_metric = [metrics[c][metric] for c in sorted(metrics)]
             avg_metric = np.average(ordered_metric, weights=ordered_weights)
@@ -468,6 +461,19 @@ def print_metrics(iteration, comm_rounds, metrics, train_weights, test_weights, 
         print('Time:', timedelta(seconds=round(elapsed_time)))
     sys.stdout.flush()
     return output
+
+
+def get_metrics_names(metrics):
+    """Gets the names of the metrics.
+
+    Args:
+        metrics: Dict keyed by client id. Each element is a dict of metrics
+            for that client in the specified round. The dicts for all clients
+            are expected to have the same set of keys."""
+    if len(metrics) == 0:
+        return []
+    metrics_dict = next(iter(metrics.values()))
+    return list(metrics_dict.keys())
 
 
 if __name__ == '__main__':
