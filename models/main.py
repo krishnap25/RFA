@@ -67,9 +67,9 @@ def main():
     server = Server(server_model)
 
     # Create clients
-    clients, corrupted_client_ids = setup_clients(args.dataset, model=client_model, validation=args.validation,
-                                                  corruption=args.corruption, fraction_corrupt=args.fraction_corrupt,
-                                                  seed=args.seed)
+    clients, corrupted_client_ids = setup_clients(args.dataset, args.data_dir, model=client_model,
+                                                  validation=args.validation, seed=args.seed,
+                                                  corruption=args.corruption, fraction_corrupt=args.fraction_corrupt)
     print('#Clients = %d ; setup time = %s' % (len(clients), timedelta(seconds=round(time.time() - start_time))))
     print('Using true labels for corrupted data as well')
     gc.collect()  # free discarded memory in setup_clients
@@ -221,6 +221,10 @@ def parse_args():
     parser.add_argument('--seed',
                         help='random seed for reproducibility;',
                         type=int)
+    parser.add_argument('--data-dir',
+                        help='relative path of directory with data',
+                        type=str,
+                        default='data')
 
     # Minibatch doesn't support num_epochs, so make them mutually exclusive
     epoch_capability_group = parser.add_mutually_exclusive_group()
@@ -288,7 +292,7 @@ def parse_args():
     return args
 
 
-def setup_clients(dataset, model=None, validation=False, corruption=None,
+def setup_clients(dataset, data_dir, model=None, validation=False, corruption=None,
                   fraction_corrupt=0.1, seed=-1, subsample=True):
     """Instantiates clients based on given train and test data directories.
         If validation is True, use part of training set as validation set
@@ -296,8 +300,8 @@ def setup_clients(dataset, model=None, validation=False, corruption=None,
     Return:
         all_clients: list of Client objects.
     """
-    train_data_dir = os.path.join('..', 'data', dataset, 'data', 'train')
-    test_data_dir = os.path.join('..', 'data', dataset, 'data', 'test')
+    train_data_dir = os.path.join(data_dir, dataset, 'data', 'train')
+    test_data_dir = os.path.join(data_dir, dataset, 'data', 'test')
 
     users, groups, train_data, test_data = read_data(train_data_dir, test_data_dir)
 
@@ -422,7 +426,7 @@ def save_model(server_model, dataset, model, output_summary_file):
     """Saves the given server model on checkpoints/dataset/model.ckpt."""
     # Save server model
     start_time = time.time()
-    ckpt_path = os.path.join('checkpoints', *(output_summary_file.split(os.path.sep)[1:]))
+    ckpt_path = os.path.join('checkpoints', output_summary_file)
     print(ckpt_path)
     if not os.path.exists(ckpt_path):
         os.makedirs(ckpt_path)
