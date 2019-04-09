@@ -82,7 +82,7 @@ time ./preprocess.sh -s niid --sf 1.0 -k 100 -t sample
   * **Overview:** Text Dataset of Shakespeare Dialogues
   * **Details:** 2288 total users, 628 users used for experiments
   * **Task:** Next-Character Prediction
-  * **Setup:** Go to ```data/shakespeare``` and run the command (takes ~17 sec and ~50MB of disk space)
+  * **Setup:** Go to ```data/shakespeare``` and run the command (takes ~17 sec and ~50M of disk space)
  
 ```
 time ./preprocess.sh -s niid --sf 1.0 -k 100 -t sample -tf 0.8
