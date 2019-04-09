@@ -95,3 +95,9 @@ Reproducting Experiments in the Paper
 The scripts provided in the folder ```experiments/``` can be used to reproduce the experiments in the paper.
 Note that ConvNet and LSTM experiments were run using GPUs and are not perfectly reproducible 
 since GPU computations are non-deterministic.
+
+From the folder `leaf-robust-agg` for this repository, create the folder 
+`outputs` and run the scripts, for example, `shakespeare_lstm.sh` as 
+```
+./experiments/main/shakespeare_lstm.sh
+``` 
