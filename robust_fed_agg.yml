@@ -1,4 +1,4 @@
-name: leaf_robust_agg
+name: robust_fed_agg
 channels:
   - anaconda
   - defaults

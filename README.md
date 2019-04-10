@@ -1,4 +1,4 @@
-# Leaf-Robust-Agg: Robust Aggregration for Federated Learning
+# Robust-Fed-Agg: Robust Aggregation for Federated Learning
 
 This code provides an implementation of 
 robust aggregation algorithms for federated learning.
@@ -44,13 +44,13 @@ Installation
 This code is written in Python 3.6 
 and has been tested on Tensorflow 1.12.
 A conda environment file is provided in 
-`leaf_robust_agg.yml` with all dependencies except Tensorflow. 
+`robust_fed_agg.yml` with all dependencies except Tensorflow. 
 It can be installed by using 
 [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file)
 as follows
 
 ```
-conda env create -f leaf_robust_agg.yml 
+conda env create -f robust_fed_agg.yml 
 ```
 
 **Installing Tensorflow:** Instructions to install 
@@ -63,8 +63,8 @@ The primary dependencies are Tensorflow, Numpy, Scipy, Pillow and Pandas.
 The code has been tested on Ubuntu 16.04.
 
 
-Setting up Data
-----------------
+Data Setup
+-----------
 
 1. EMNIST (Called FEMNIST here)
 
@@ -92,11 +92,13 @@ time ./preprocess.sh -s niid --sf 1.0 -k 100 -t sample -tf 0.8
 Reproducting Experiments in the Paper
 -------------------------------------
 
-The scripts provided in the folder ```experiments/``` can be used to reproduce the experiments in the paper.
-Note that ConvNet and LSTM experiments were run using GPUs and are not perfectly reproducible 
-since GPU computations are non-deterministic.
+Once the data has been set up, the scripts provided in the folder ```experiments/``` can be used 
+to reproduce the experiments in the paper.
+Note that GPU computations are non-deterministic. Consequently, the ConvNet and LSTM 
+experiments reported in the paper, which were run using GPUs, are not perfectly reproducible. 
 
-From the folder `leaf-robust-agg` for this repository, create the folder 
+
+From the folder `robust-fed-agg` for this repository, create the folder 
 `outputs` and run the scripts, for example, `shakespeare_lstm.sh` as 
 ```
 ./experiments/main/shakespeare_lstm.sh
