@@ -98,8 +98,12 @@ Note that GPU computations are non-deterministic. Consequently, the ConvNet and 
 experiments reported in the paper, which were run using GPUs, are not perfectly reproducible. 
 
 
-From the folder `rfa` for this repository, create the folder 
-`outputs` and run the scripts, for example, `shakespeare_lstm.sh` as 
+From the base folder of this repository, first create the folder 
+`outputs` as 
+```
+mkdir outputs
+```
+and run the scripts, for example, `shakespeare_lstm.sh` as 
 ```
 ./experiments/main/shakespeare_lstm.sh
 ``` 
