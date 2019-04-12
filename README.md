@@ -4,10 +4,10 @@ This code provides an implementation of
 robust aggregation algorithms for federated learning.
 This codebase is based on a fork of the [Leaf](leaf.cmu.edu) benchmark suite
 and provides scripts to reproduce the experimental results in the 
-[paper](https://arxiv.org/pdf/??.pdf):
+paper:
 
 K. Pillutla, S. M. Kakade and Z. Harchaoui. 
-Robust Aggregation for Federated Learning. arXiv preprint arXiv:??, 2019 
+Robust Aggregation for Federated Learning. arXiv preprint, 2019 
 
 If you use this code, please cite the paper using the bibtex reference below
 
@@ -15,7 +15,7 @@ If you use this code, please cite the paper using the bibtex reference below
 @article{pillutla2019robust ,
   title={{R}obust {A}ggregation for {F}ederated {L}earning},
   author={Pillutla, Krishna and  Kakade, Sham M. and Harchaoui, Zaid},
-  journal={arXiv preprint arXiv:??},
+  journal={arXiv preprint},
   year={2019}
 }
 ```
@@ -28,12 +28,12 @@ A typical federated learning algorithm consists in local computation on some
 of the devices followed by secure aggregation of individual device updates 
 to update the central model. 
 
-The accompanying [paper](https://arxiv.org/pdf/??.pdf) describes a 
+The accompanying paper (coming soon!) describes a 
 robust aggregation approach to make federated learning robust 
 to settings when a fraction of the devices may be sending outlier updates to the server. 
 
 This code compares the FedAvg algorithm ([McMahan et. al. 2017](https://arxiv.org/abs/1602.05629)), 
-the RobustFedAvg proposed in the accompanying [paper](https://arxiv.org/pdf/??.pdf) 
+the RobustFedAgg proposed in the accompanying paper
 as well as stochastic gradient descent. 
 The code has been developed from a fork of [Leaf](leaf.cmu.edu), commit 
 ```51ab702af932090b3bd122af1a812ea4da6d8740```.
