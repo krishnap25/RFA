@@ -1,4 +1,4 @@
-name: robust_fed_agg
+name: rfa
 channels:
   - anaconda
   - defaults

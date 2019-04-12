@@ -1,4 +1,4 @@
-# Robust-Fed-Agg: Robust Aggregation for Federated Learning
+# RFA: Robust Aggregation for Federated Learning
 
 This code provides an implementation of 
 robust aggregation algorithms for federated learning.
@@ -32,8 +32,8 @@ The accompanying paper (coming soon!) describes a
 robust aggregation approach to make federated learning robust 
 to settings when a fraction of the devices may be sending outlier updates to the server. 
 
-This code compares the FedAvg algorithm ([McMahan et. al. 2017](https://arxiv.org/abs/1602.05629)), 
-the RobustFedAgg proposed in the accompanying paper
+This code compares the RobustFedAgg algorithm proposed in the accompanying paper
+to the FedAvg algorithm ([McMahan et. al. 2017](https://arxiv.org/abs/1602.05629))
 as well as stochastic gradient descent. 
 The code has been developed from a fork of [Leaf](leaf.cmu.edu), commit 
 ```51ab702af932090b3bd122af1a812ea4da6d8740```.
@@ -44,13 +44,13 @@ Installation
 This code is written in Python 3.6 
 and has been tested on Tensorflow 1.12.
 A conda environment file is provided in 
-`robust_fed_agg.yml` with all dependencies except Tensorflow. 
+`rfa.yml` with all dependencies except Tensorflow. 
 It can be installed by using 
 [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file)
 as follows
 
 ```
-conda env create -f robust_fed_agg.yml 
+conda env create -f rfa.yml 
 ```
 
 **Installing Tensorflow:** Instructions to install 
@@ -98,7 +98,7 @@ Note that GPU computations are non-deterministic. Consequently, the ConvNet and 
 experiments reported in the paper, which were run using GPUs, are not perfectly reproducible. 
 
 
-From the folder `robust-fed-agg` for this repository, create the folder 
+From the folder `rfa` for this repository, create the folder 
 `outputs` and run the scripts, for example, `shakespeare_lstm.sh` as 
 ```
 ./experiments/main/shakespeare_lstm.sh
