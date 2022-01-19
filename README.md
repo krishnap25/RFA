@@ -20,6 +20,10 @@ If you use this code, please cite the paper using the bibtex reference below
 }
 ```
 
+### Please see [here](https://github.com/krishnap25/tRFA) for a PyTorch implementation of RFA.
+
+
+
 Introduction
 -----------------
 Federated Learning is a paradigm to train centralized machine learning models 
@@ -28,7 +32,7 @@ A typical federated learning algorithm consists in local computation on some
 of the devices followed by secure aggregation of individual device updates 
 to update the central model. 
 
-The accompanying paper (coming soon!) describes a 
+The accompanying [paper](https://arxiv.org/abs/1912.13445) describes a 
 robust aggregation approach to make federated learning robust 
 to settings when a fraction of the devices may be sending outlier updates to the server. 
 
@@ -89,7 +93,7 @@ time ./preprocess.sh -s niid --sf 1.0 -k 100 -t sample -tf 0.8
 ```
 
 
-Reproducting Experiments in the Paper
+Reproducing Experiments in the Paper
 -------------------------------------
 
 Once the data has been set up, the scripts provided in the folder ```experiments/``` can be used 
