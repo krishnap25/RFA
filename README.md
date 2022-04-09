@@ -16,7 +16,7 @@ Robust Aggregation for Federated Learning. arXiv preprint, 2019
 If you use this code, please cite the paper using the bibtex reference below
 
 ```
-@article{pillutla2019robust,
+@article{pillutla2022robust,
   author={Pillutla, Krishna and Kakade, Sham M. and Harchaoui, Zaid},
   journal={IEEE Transactions on Signal Processing}, 
   title={{Robust Aggregation for Federated Learning}}, 
