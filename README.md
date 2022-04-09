@@ -1,5 +1,9 @@
 # RFA: Robust Aggregation for Federated Learning
 
+### Please see [here](https://github.com/krishnap25/tRFA) for a PyTorch implementation of RFA.
+
+### Please see [here](https://github.com/krishnap25/geom_median) for a self-contained implementation of the geometric median.
+
 This code provides an implementation of 
 robust aggregation algorithms for federated learning.
 This codebase is based on a fork of the [Leaf](leaf.cmu.edu) benchmark suite
@@ -19,8 +23,6 @@ If you use this code, please cite the paper using the bibtex reference below
   year={2019}
 }
 ```
-
-### Please see [here](https://github.com/krishnap25/tRFA) for a PyTorch implementation of RFA.
 
 
 
