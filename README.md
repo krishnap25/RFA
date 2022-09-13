@@ -8,10 +8,7 @@ This code provides an implementation of
 robust aggregation algorithms for federated learning.
 This codebase is based on a fork of the [Leaf](leaf.cmu.edu) benchmark suite
 and provides scripts to reproduce the experimental results in the 
-paper:
-
-K. Pillutla, S. M. Kakade and Z. Harchaoui. 
-Robust Aggregation for Federated Learning. arXiv preprint, 2019 
+paper [Robust Aggregation for Federated Learning](https://ieeexplore.ieee.org/document/9721118/). 
 
 If you use this code, please cite the paper using the bibtex reference below
 
